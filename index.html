@@ -1,1 +1,86 @@
-<h1>Hello!</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Planner</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8 font-sans text-gray-800">
+
+  <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Event Planning Form</h1>
+
+    <!-- Basic Info -->
+    <div class="space-y-4">
+      <input type="text" placeholder="Name" class="w-full border p-2 rounded" />
+      <input type="date" class="w-full border p-2 rounded" />
+      <input type="tel" placeholder="Phone Number" class="w-full border p-2 rounded" />
+    </div>
+
+    <!-- Package Dropdown -->
+    <div class="mt-6">
+      <label class="block mb-2 font-medium">Select a Package:</label>
+      <select id="package" class="w-full border p-2 rounded">
+        <option value="">-- Select Package --</option>
+        <option value="bronze">Bronze</option>
+        <option value="silver">Silver</option>
+        <option value="gold">Gold</option>
+        <option value="platinum">Platinum</option>
+      </select>
+    </div>
+
+    <!-- Additional Fields (Initially disabled) -->
+    <div id="extra-fields" class="mt-6 space-y-4 opacity-50 pointer-events-none">
+      <input type="text" placeholder="Food Selection" class="w-full border p-2 rounded" />
+      <input type="text" placeholder="Prize Selection" class="w-full border p-2 rounded" />
+    </div>
+
+    <!-- Timeline / Schedule -->
+    <div class="mt-8">
+      <h2 class="text-lg font-semibold mb-2">Schedule</h2>
+      <div id="timeline" class="space-y-2">
+        <!-- First row will always show -->
+        <div class="flex gap-2">
+          <input type="time" class="border p-2 rounded w-1/3" />
+          <input type="text" placeholder="Activity" class="border p-2 rounded w-2/3" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Button -->
+    <div class="mt-8 text-center">
+      <button class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
+        Download as PDF
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const packageDropdown = document.getElementById('package');
+    const extraFields = document.getElementById('extra-fields');
+    const timeline = document.getElementById('timeline');
+
+    // Unlock extra fields for Silver and up
+    packageDropdown.addEventListener('change', () => {
+      const value = packageDropdown.value;
+      if (['silver', 'gold', 'platinum'].includes(value)) {
+        extraFields.classList.remove('opacity-50', 'pointer-events-none');
+      } else {
+        extraFields.classList.add('opacity-50', 'pointer-events-none');
+      }
+    });
+
+    // Add new schedule row on input
+    timeline.addEventListener('input', (e) => {
+      const lastRow = timeline.lastElementChild;
+      const inputs = lastRow.querySelectorAll('input');
+      if (inputs[0].value || inputs[1].value) {
+        const newRow = lastRow.cloneNode(true);
+        newRow.querySelectorAll('input').forEach(input => input.value = '');
+        timeline.appendChild(newRow);
+      }
+    });
+  </script>
+
+</body>
+</html>
