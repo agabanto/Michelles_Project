@@ -10,9 +10,16 @@
     <script src="https://unpkg.com/docx@8.4.0/build/index.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://unpkg.com/docx@8.4.0/build/index.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 
-<body class="bg-gray-100 p-8 font-sans text-gray-800 text-sm">
+<body class="p-8 font-sans text-gray-800 text-sm"
+  style="background-image: url('blob-scene-haikei.png');
+         background-size: cover;
+         background-repeat: no-repeat;
+         background-position: top;
+         background-color: #fdf4ff;">
 
     <!-- User Form -->
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg mb-8 space-y-8">
@@ -31,11 +38,15 @@
                 </div>
             </div>
 
-            <!-- Row 2: Birthday Child + Parent Name -->
+            <!-- Row 2: Birthday Child + Parent Name, with Age under Birthday Child -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="birthday-child" class="block mb-1 font-medium">Birthday Child</label>
                     <input type="text" id="birthday-child" placeholder="Enter birthday child's name"
+                        class="w-full border p-3 rounded mb-3" />
+
+                    <label for="age" class="block mb-1 font-medium">Child Age</label>
+                    <input type="number" id="age" min="1" max="18" placeholder="Enter age"
                         class="w-full border p-3 rounded" />
                 </div>
                 <div>
@@ -44,6 +55,7 @@
                         class="w-full border p-3 rounded" />
                 </div>
             </div>
+
         </div>
 
         <hr class="my-6 border-t">
@@ -53,15 +65,15 @@
                 <option value="" disabled selected hidden>-- Select Activity --</option>
 
                 <optgroup label="Kids Packages">
-                    <option value="kids-bronze">Kids Bronze</option>
-                    <option value="kids-silver">Kids Silver</option>
-                    <option value="kids-gold">Kids Gold</option>
-                    <option value="kids-platinum">Kids Platinum</option>
+                    <option value="Kids Bronze">Kids Bronze</option>
+                    <option value="Kids Silver">Kids Silver</option>
+                    <option value="Kids Gold">Kids Gold</option>
+                    <option value="Kids Platinum">Kids Platinum</option>
                 </optgroup>
 
                 <optgroup label="Teens Packages">
-                    <option value="teens-silver">Teens Silver</option>
-                    <option value="teens-gold">Teens Gold</option>
+                    <option value="Teens Silver">Teens Silver</option>
+                    <option value="Teens Gold">Teens Gold</option>
                 </optgroup>
             </select>
         </div>
@@ -106,7 +118,7 @@
                     <tbody>
                         <tr id="extra-row-1">
                             <td class="border px-3 py-2">
-                                <select id="extra-activity-1" class="w-full border rounded p-2">
+                                <select id="extra-activity-1" class="w-full border p-2 rounded" disabled">
                                     <option value="" disabled selected hidden>-- Extra Activity 1 --</option>
                                     <option value="Bowling">Bowling</option>
                                     <option value="Karaoke">Karaoke</option>
@@ -116,7 +128,7 @@
                                 </select>
                             </td>
                             <td class="border px-3 py-2">
-                                <input type="time" id="extra-time-1" class="w-full border rounded p-2">
+                                <input type="time" id="extra-time-1" class="w-full border p-2 rounded" disabled">
                             </td>
                         </tr>
 
@@ -138,31 +150,53 @@
 
                         <tr>
                             <td class="border px-3 py-2">Mid Party Snack</td>
-                            <td class="border px-3 py-2"><input type="time" class="w-full border rounded p-2"></td>
+                            <td class="border px-3 py-2">
+                                <input type="time" id="snack-time" class="w-full border rounded p-2">
+                            </td>
                         </tr>
                         <tr>
                             <td class="border px-3 py-2">Throne</td>
-                            <td class="border px-3 py-2"><input type="time" class="w-full border rounded p-2"></td>
+                            <td class="border px-3 py-2">
+                                <input type="time" id="throne-time" class="w-full border rounded p-2">
+                            </td>
                         </tr>
                         <tr>
                             <td class="border px-3 py-2">Arcade</td>
-                            <td class="border px-3 py-2"><input type="time" class="w-full border rounded p-2"></td>
+                            <td class="border px-3 py-2">
+                                <input type="time" id="arcade-time" class="w-full border rounded p-2">
+                            </td>
                         </tr>
                         <tr>
                             <td class="border px-3 py-2">Winners Vault</td>
-                            <td class="border px-3 py-2"><input type="time" class="w-full border rounded p-2"></td>
+                            <td class="border px-3 py-2">
+                                <input type="time" id="winners-time" class="w-full border rounded p-2">
+                            </td>
                         </tr>
                         <tr>
                             <td class="border px-3 py-2">Food & Cake</td>
-                            <td class="border px-3 py-2"><input type="time" class="w-full border rounded p-2"></td>
+                            <td class="border px-3 py-2">
+                                <input type="time" id="cake-time" class="w-full border rounded p-2">
+                            </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        <button onclick="generateEventDocx(getFormData())" class="bg-indigo-600 text-white px-4 py-2 rounded">
-            Download Word Doc
-        </button>
+        <div class="flex gap-4 mt-6">
+            <!-- Generate Word Doc Button -->
+            <button onclick="generateEventDocx(getFormData())"
+                class="bg-[#2B579A] hover:bg-[#1E3E70] text-white px-4 py-2 rounded shadow flex items-center gap-2">
+                <i class="fas fa-file-word text-white text-lg"></i>
+                Generate Word Doc
+            </button>
+
+            <!-- Generate PDF Button -->
+            <button onclick="generateEventPDF(getFormData())"
+                class="bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-4 py-2 rounded shadow flex items-center gap-2">
+                <i class="fas fa-file-pdf text-white text-lg"></i>
+                Generate PDF
+            </button>
+        </div>
     </div>
     </div>
     </div>
@@ -179,32 +213,40 @@
 
             const food = document.getElementById("food");
             const prize = document.getElementById("prize");
+            const activity1 = document.getElementById("extra-activity-1");
+            const time1 = document.getElementById("extra-time-1");
+            const activity2 = document.getElementById("extra-activity-2");
+            const time2 = document.getElementById("extra-time-2");
+
             const extraFields = document.getElementById("extra-fields");
+            const allTimeInputs = document.querySelectorAll("input[type='time']");
+            const allActivitySelects = document.querySelectorAll("select[id^='extra-activity']");
 
             if (selected) {
-                // Enable food and prize dropdowns
+                // Enable food, prize, extra activity 1 and time fields
                 food.disabled = false;
                 prize.disabled = false;
+                activity1.disabled = false;
+                time1.disabled = false;
                 extraFields.classList.remove("opacity-50", "pointer-events-none");
+                allTimeInputs.forEach(input => input.disabled = false);
+                allActivitySelects.forEach(select => select.disabled = false);
             } else {
+                // Disable everything if no package is selected
                 food.disabled = true;
                 prize.disabled = true;
+                activity1.disabled = true;
+                time1.disabled = true;
+                activity2.disabled = true;
+                time2.disabled = true;
                 extraFields.classList.add("opacity-50", "pointer-events-none");
+                allTimeInputs.forEach(input => input.disabled = true);
+                allActivitySelects.forEach(select => select.disabled = true);
             }
 
-            const oneActivity = ["kids-bronze", "kids-silver", "teens-silver"];
-            const twoActivities = ["kids-gold", "kids-platinum", "teens-gold"];
-
-            if (oneActivity.includes(selected)) {
-                row1.style.display = "";
-                row2.style.display = "none";
-            } else if (twoActivities.includes(selected)) {
-                row1.style.display = "";
-                row2.style.display = "";
-            } else {
-                row1.style.display = "none";
-                row2.style.display = "none";
-            }
+            // Logic for whether to show Extra Activity 2
+            const twoActivities = ["Kids Gold", "Kids Platinum", "Teens Gold"];
+            row2.style.display = twoActivities.includes(selected) ? "" : "none";
         });
 
         // Re-check on page load
@@ -214,29 +256,85 @@
     </script>
 
     <script>
+        function createCell(label, value = "") {
+            return new docx.TableCell({
+                children: [new docx.Paragraph({
+                    children: [
+                        new docx.TextRun({ text: label + " ", bold: true }),
+                        new docx.TextRun({ text: value })
+                    ]
+                })],
+                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                width: { size: 33.3, type: "pct" }
+            });
+        }
+
         function getFormData() {
             return {
                 host: document.getElementById("host").value,
                 date: document.getElementById("date").value,
                 birthdayChild: document.getElementById("birthday-child").value,
                 parentName: document.getElementById("parent-name").value,
+                age: document.getElementById("age").value,
                 package: document.getElementById("package").value,
                 food: document.getElementById("food").value,
                 prize: document.getElementById("prize").value,
                 activity1: document.getElementById("extra-activity-1").value,
                 time1: document.getElementById("extra-time-1").value,
                 activity2: document.getElementById("extra-activity-2").value,
-                time2: document.getElementById("extra-time-2").value
+                time2: document.getElementById("extra-time-2").value,
+                snackTime: document.getElementById("snack-time").value,
+                throneTime: document.getElementById("throne-time").value,
+                arcadeTime: document.getElementById("arcade-time").value,
+                winnersTime: document.getElementById("winners-time").value,
+                cakeTime: document.getElementById("cake-time").value
             };
         }
     </script>
 
     <script>
+        async function generateEventDocxAndConvertToPDF(formData) {
+            const doc = await buildWordDocument(formData); // Extract your doc creation logic to this
+            const blob = await window.docx.Packer.toBlob(doc);
+
+            // Convert to PDF using Cloudmersive
+            const formDataToSend = new FormData();
+            formDataToSend.append("file", blob, "event.docx");
+
+            try {
+                const response = await axios.post(
+                    "https://api.cloudmersive.com/convert/docx/to/pdf",
+                    formDataToSend,
+                    {
+                        headers: {
+                            "Content-Type": "multipart/form-data",
+                            "Apikey": "4312a960-d69d-4887-b4f6-bed214a03992"
+                        },
+                        responseType: "blob" // Get binary PDF
+                    }
+                );
+
+                // Save the PDF
+                const pdfBlob = new Blob([response.data], { type: "application/pdf" });
+                window.saveAs(pdfBlob, `${formData.host || "event"}-summary.pdf`);
+            } catch (error) {
+                console.error("Cloudmersive API error:", error);
+                alert("There was a problem converting the DOCX to PDF.");
+            }
+        }
+
         async function generateEventDocx(formData) {
+            const doc = await buildWordDocument(formData);
+            const blob = await window.docx.Packer.toBlob(doc);
+            window.saveAs(blob, `${formData.host || "event"}-summary.docx`);
+        }
+
+        async function buildWordDocument(formData) {
             const {
                 host,
                 date,
                 birthdayChild,
+                age,
                 parentName,
                 package,
                 food,
@@ -244,7 +342,12 @@
                 activity1,
                 time1,
                 activity2,
-                time2
+                time2,
+                snackTime,
+                throneTime,
+                arcadeTime,
+                winnersTime,
+                cakeTime
             } = formData;
 
             const doc = new window.docx.Document({
@@ -252,124 +355,411 @@
                     default: {
                         document: {
                             run: {
-                                font: "Arial",
+                                font: "Roboto",
                                 size: 20 // 14pt
                             }
                         }
                     }
                 },
+                numbering: {
+                    config: [
+                        {
+                            reference: "checkbox-bullets",
+                            levels: [
+                                {
+                                    level: 0,
+                                    format: "bullet",
+                                    text: "☐", // hollow square
+                                    alignment: docx.AlignmentType.LEFT
+                                }
+                            ]
+                        }
+                    ]
+                },
                 sections: [
                     {
+                        properties: {
+                            page: {
+                                margin: {
+                                    top: 720,      // 0.5 inch
+                                    right: 720,
+                                    bottom: 720,
+                                    left: 720
+                                }
+                            }
+                        },
+                        headers: {},
+                        footers: {
+                            default: new docx.Footer({
+                                children: [
+                                    new docx.Paragraph({
+                                        alignment: docx.AlignmentType.CENTER,
+                                        children: [
+                                            new docx.TextRun({
+                                                text: "ALWAYS STAY WITH YOUR PARTY",
+                                                bold: true,
+                                                color: "999999", // Soft grey to simulate transparency
+                                                size: 28
+                                            })
+                                        ],
+                                    })
+                                ]
+                            })
+                        },
                         children: [
-                            new docx.Paragraph({
-                                text: "Event Planning Summary",
-                                heading: docx.HeadingLevel.HEADING_1,
-                                spacing: { after: 300 }
-                            }),
 
                             new docx.Table({
                                 rows: [
                                     new docx.TableRow({
                                         children: [
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Host: ${host}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            }),
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Date: ${date}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            }),
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Birthday Child: ${birthdayChild}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            }),
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Parent Name: ${parentName}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            })
+                                            createCell("Host:", host),
+                                            createCell("Birthday Child:", birthdayChild),
+                                            createCell("Date:", date)
                                         ]
-                                    })
-                                    ,new docx.TableRow({
+                                    }),
+                                    new docx.TableRow({
+                                        children: [
+                                            createCell("Package:", package),
+                                            createCell("Age:", age),
+                                            createCell("Parent Name:", parentName)
+                                        ]
+                                    }),
+                                    new docx.TableRow({
+                                        children: [
+                                            createCell("No. of Guests:", ""),
+                                            createCell("Table Number:", ""),
+                                            createCell("Waiting Table:", "")
+                                        ]
+                                    }),
+                                    new docx.TableRow({
+                                        children: [
+                                            createCell("Goodie Bags:", ""),
+                                            createCell("GOH Gift:", prize),
+                                            createCell("Lanyard Colour:", "")
+                                        ]
+                                    }),
+                                    new docx.TableRow({
                                         children: [
                                             new docx.TableCell({
-                                                children: [new docx.Paragraph(`Host: ${host}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            }),
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Date: ${date}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            }),
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Birthday Child: ${birthdayChild}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
-                                            }),
-                                            new docx.TableCell({
-                                                children: [new docx.Paragraph(`Parent Name: ${parentName}`)],
-                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
-                                                width: { size: 25, type: "pct" }
+                                                children: [new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "Extras:", bold: true })]
+                                                })],
+                                                columnSpan: 3,
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 }
                                             })
                                         ]
                                     })
                                 ],
                                 width: { size: 100, type: "pct" },
-                                borders: { top: { size: 0, color: "FFFFFF" }, bottom: { size: 0, color: "FFFFFF" }, left: { size: 0, color: "FFFFFF" }, right: { size: 0, color: "FFFFFF" } }
+                                borders: {
+                                    top: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                    bottom: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                    left: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                    right: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                    insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                    insideVertical: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" }
+                                }
                             }),
 
-                            new docx.Paragraph({
-                                text: `Selected Package: ${package}`,
-                                spacing: { after: 200 }
-                            }),
+                            new docx.Paragraph({ text: "", spacing: { after: 1 } }),
 
-                            new docx.Paragraph({
-                                text: "Food & Prize",
-                                heading: docx.HeadingLevel.HEADING_2
-                            }),
-                            new docx.Paragraph({ text: `Food: ${food}` }),
-                            new docx.Paragraph({ text: `Prize: ${prize}` }),
+                            (() => {
+                                const activityRow = [];
+                                const timeRow = [];
 
-                            new docx.Paragraph({
-                                text: "Extra Activities",
-                                heading: docx.HeadingLevel.HEADING_2,
-                                spacing: { before: 400 }
-                            }),
+                                // Prepare the dynamic parts
+                                const dynamicActivities = [];
+                                if (activity1 || time1) {
+                                    dynamicActivities.push({
+                                        activity: activity1 || "",
+                                        time: time1 || ""
+                                    });
+                                }
+                                if (activity2 || time2) {
+                                    dynamicActivities.push({
+                                        activity: activity2 || "",
+                                        time: time2 || ""
+                                    });
+                                }
+
+                                // Add static activities
+                                const staticActivities = ["Mid-Party Snack", "Throne", "Arcade", "Winners Vault", "Food & Cake"];
+                                const staticTimes = [snackTime, throneTime, arcadeTime, winnersTime, cakeTime];
+
+                                const allActivities = dynamicActivities.map(a => a.activity).concat(staticActivities);
+                                const allTimes = dynamicActivities.map(a => a.time).concat(staticTimes);
+
+                                const columnCount = allActivities.length;
+                                const colWidth = 100 / columnCount;
+
+                                // First row: Activity names
+                                for (const activity of allActivities) {
+                                    activityRow.push(new docx.TableCell({
+                                        children: [new docx.Paragraph({
+                                            children: [new docx.TextRun({ text: activity, bold: true })],
+                                            alignment: docx.AlignmentType.CENTER,
+                                        })],
+                                        width: { size: colWidth, type: "pct" },
+                                        margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                        verticalAlign: docx.VerticalAlign.CENTER
+                                    }));
+
+                                }
+
+                                // Second row: Times
+                                for (const time of allTimes) {
+                                    timeRow.push(new docx.TableCell({
+                                        children: [new docx.Paragraph({
+                                            text: time,
+                                            alignment: docx.AlignmentType.CENTER
+                                        })],
+                                        width: { size: colWidth, type: "pct" },
+                                        margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                        verticalAlign: docx.VerticalAlign.CENTER
+                                    }));
+
+                                }
+
+                                return new docx.Table({
+                                    rows: [
+                                        new docx.TableRow({ children: activityRow }),
+                                        new docx.TableRow({ children: timeRow })
+                                    ],
+                                    width: { size: 100, type: "pct" },
+                                    borders: {
+                                        top: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                        bottom: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                        left: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                        right: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                        insideHorizontal: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" },
+                                        insideVertical: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" }
+                                    }
+                                });
+                            })(),
+
+                            new docx.Paragraph({ text: "", spacing: { after: 1 } }),
 
                             new docx.Table({
                                 rows: [
                                     new docx.TableRow({
                                         children: [
-                                            new docx.TableCell({ children: [new docx.Paragraph("Activity")] }),
-                                            new docx.TableCell({ children: [new docx.Paragraph("Time")] })
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "Party Host Checklist", bold: true, size: 24 })],
+                                                    spacing: { after: 150 }
+                                                }),
+
+                                                // Before the Party
+                                                new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "Before the Party", bold: true })],
+                                                    spacing: { after: 100 }
+                                                }),
+                                                ...[
+                                                    "Uniform check, badge, apron, etc.",
+                                                    "Run sheet filled out.",
+                                                    "Booking sheet checked for all details.",
+                                                    "Birthday card ready.",
+                                                    "Table set up.",
+                                                    "Lanyards & cards ready to go.",
+                                                    "Lightweight bowling balls on ball return."
+                                                ].map(item =>
+                                                    new docx.Paragraph({
+                                                        numbering: { reference: "checkbox-bullets", level: 0 },
+                                                        indent: {
+                                                            left: 720,       // Indent from left (0.5 inches)
+                                                            hanging: 360     // Hanging indent so overflow aligns with text (0.25 inches)
+                                                        },
+                                                        children: [new docx.TextRun(item)],
+                                                    })
+                                                ),
+
+                                                // During the Party
+                                                new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "During the Party", bold: true })],
+                                                    spacing: { before: 150, after: 100 }
+                                                }),
+                                                ...[
+                                                    "Introduction, safety briefing, and lanyard.",
+                                                ].map(item =>
+                                                    new docx.Paragraph({
+                                                        numbering: { reference: "checkbox-bullets", level: 0 },
+                                                        indent: {
+                                                            left: 720,       // Indent from left (0.5 inches)
+                                                            hanging: 360     // Hanging indent so overflow aligns with text (0.25 inches)
+                                                        },
+                                                        children: [new docx.TextRun(item)]
+                                                    })
+                                                ),
+
+                                                new docx.Paragraph({
+                                                    numbering: { reference: "checkbox-bullets", level: 0 },
+                                                    indent: {
+                                                        left: 720,       // Indent from left (0.5 inches)
+                                                        hanging: 360     // Hanging indent so overflow aligns with text (0.25 inches)
+                                                    },
+                                                    children: [
+                                                        new docx.TextRun({ text: "Take food order and send to kitchen. " }),
+                                                        new docx.TextRun({ text: "Do this during briefing when all the guests are still together.", bold: true })
+                                                    ]
+                                                }),
+
+                                                ...[
+                                                    "Group games and activities.",
+                                                    "Give hi-fives and lots of encouragement.",
+                                                    "Check-in with parents.",
+                                                    "Complete headcount.",
+                                                    "All extra activities completed (i.e. laser tag).",
+                                                    "Throne and photos.",
+                                                    "Winners vault.",
+                                                    "Create remarkable moments for party guests.",
+                                                    "Serve food/cake and keep party space clean."
+                                                ].map(item =>
+                                                    new docx.Paragraph({
+                                                        numbering: { reference: "checkbox-bullets", level: 0 },
+                                                        indent: {
+                                                            left: 720,       // Indent from left (0.5 inches)
+                                                            hanging: 360     // Hanging indent so overflow aligns with text (0.25 inches)
+                                                        },
+                                                        children: [new docx.TextRun(item)]
+                                                    })
+                                                ),
+
+                                                // Thank You & Goodbye
+                                                new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "Thank You & Goodbye", bold: true })],
+                                                    spacing: { before: 150, after: 100 }
+                                                }),
+                                                ...[
+                                                    "Ensure each guest is picked up and ticked off when collected.",
+                                                    "Help birthday party parents with any presents or food pack up.",
+                                                    "Hand out Thank You/Review Card."
+                                                ].map(item =>
+                                                    new docx.Paragraph({
+                                                        numbering: { reference: "checkbox-bullets", level: 0 },
+                                                        indent: {
+                                                            left: 720,       // Indent from left (0.5 inches)
+                                                            hanging: 360     // Hanging indent so overflow aligns with text (0.25 inches)
+                                                        },
+                                                        children: [new docx.TextRun(item)]
+                                                    })
+                                                ),
+
+                                                // After the Party
+                                                new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "After the Party", bold: true })],
+                                                    spacing: { before: 150, after: 100 }
+                                                }),
+                                                ...[
+                                                    "Clean down tables and chairs.",
+                                                    "Spot clean floor.",
+                                                    "Remove any rubbish.",
+                                                    "Clear any dishes.",
+                                                    "Check in with MOD/Coordinator for any other task."
+                                                ].map(item =>
+                                                    new docx.Paragraph({
+                                                        numbering: { reference: "checkbox-bullets", level: 0 },
+                                                        indent: {
+                                                            left: 720,       // Indent from left (0.5 inches)
+                                                            hanging: 360     // Hanging indent so overflow aligns with text (0.25 inches)
+                                                        },
+                                                        children: [new docx.TextRun(item)]
+                                                    })
+                                                ),
+                                                ],
+                                                borders: {
+                                                    top: { style: docx.BorderStyle.NONE },
+                                                    bottom: { style: docx.BorderStyle.NONE },
+                                                    left: { style: docx.BorderStyle.NONE },
+                                                    right: { style: docx.BorderStyle.SINGLE, size: 4, color: "000000" } // Middle dividing border
+                                                },
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 53, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph({
+                                                    children: [new docx.TextRun({ text: "Games & Challenge Ideas", bold: true, size: 24 })],
+                                                    spacing: { after: 150 }
+                                                }),
+                                                new docx.Paragraph({
+                                                    text: "Aim to play 5 games with every party.",
+                                                    spacing: { before: 150, after: 150 }
+                                                }),
+
+                                                ...[
+                                                    {
+                                                        title: "Basketball Challenge",
+                                                        desc: "Divide your party into teams and have them take turns shooting hoops."
+                                                    },
+                                                    {
+                                                        title: "Air Hockey Challenge",
+                                                        desc: "Divide party into two groups. Whoever scores the point stays on. Rotate through all your party guests."
+                                                    },
+                                                    {
+                                                        title: "TikTok Dance",
+                                                        desc: "Have the guest of honour choose their favourite trending TikTok dance and teach it to the group. Make sure to queue the song on Crowd DJ so they can dance along! Best used for teens."
+                                                    },
+                                                    {
+                                                        title: "Speedy Bowler",
+                                                        desc: "Have each lane throw a ball at the same time. Winner is the person whose ball hits the pins first."
+                                                    },
+                                                    {
+                                                        title: "Bowling Under Your Legs",
+                                                        desc: "Have guests turn around and throw the ball with two hands under their legs."
+                                                    },
+                                                    {
+                                                        title: "Conga Line",
+                                                        desc: "When moving between activities, have guests line up in a single file line, place their hands on the shoulders of the person in front and conga dance to their next destination! Best used for younger children."
+                                                    },
+                                                    {
+                                                        title: "Laser Teams",
+                                                        desc: "If playing in laser tag, have each team pick a fun team name and yell it out as a group!"
+                                                    }
+                                                ].flatMap(game => [
+                                                    new docx.Paragraph({
+                                                        children: [
+                                                            new docx.TextRun({ text: game.title, bold: true })
+                                                        ],
+                                                        spacing: { after: 100 }
+                                                    }),
+                                                    new docx.Paragraph({
+                                                        text: game.desc,
+                                                        spacing: { after: 150 }
+                                                    })
+                                                ]),
+
+                                                new docx.Paragraph({
+                                                    children: [
+                                                        new docx.TextRun({
+                                                            text: "Not all teen parties will want to play games. Let the party take the lead and decide what games they will play!",
+                                                            italics: true,
+                                                            bold: true
+                                                        })
+                                                    ]
+                                                }),
+                                                ],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 47, type: "pct" }
+                                            })
                                         ]
                                     }),
-                                    new docx.TableRow({
-                                        children: [
-                                            new docx.TableCell({ children: [new docx.Paragraph(activity1 || "")] }),
-                                            new docx.TableCell({ children: [new docx.Paragraph(time1 || "")] })
-                                        ]
-                                    }),
-                                    new docx.TableRow({
-                                        children: [
-                                            new docx.TableCell({ children: [new docx.Paragraph(activity2 || "")] }),
-                                            new docx.TableCell({ children: [new docx.Paragraph(time2 || "")] })
-                                        ]
-                                    })
-                                ]
-                            })
+                                ],
+                                width: { size: 100, type: "pct" },
+                                borders: {
+                                    top: { size: 0, color: "FFFFFF" },
+                                    bottom: { size: 0, color: "FFFFFF" },
+                                    left: { size: 0, color: "FFFFFF" },
+                                    right: { size: 0, color: "FFFFFF" },
+                                    insideHorizontal: { size: 0, color: "000000" },
+                                    insideVertical: { size: 0, color: "000000" }
+                                }
+                            }),
                         ]
                     }
                 ]
             });
-
             const blob = await window.docx.Packer.toBlob(doc);
-            window.saveAs(blob, `${host || "event"}-summary.docx`);
-        } 
+            return doc;
+        }
     </script>
 
 
