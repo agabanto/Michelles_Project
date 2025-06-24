@@ -8,31 +8,47 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script src="https://unpkg.com/docx@8.4.0/build/index.umd.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://unpkg.com/docx@8.4.0/build/index.umd.js"></script>
 </head>
 
 <body class="bg-gray-100 p-8 font-sans text-gray-800 text-sm">
 
     <!-- User Form -->
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg mb-8 space-y-8">
-        <h1 class="text-2xl font-bold mb-6 text-center">Event Planning Form</h1>
+        <h1 class="text-2xl font-bold mb-6 text-center">Michelle's Event Planning Form</h1>
 
         <div class="space-y-4">
             <!-- Row 1: Host Name + Date -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="host" placeholder="Host Name" class="w-full border p-3 rounded" />
-                <input type="date" id="date" class="w-full border p-3 rounded" />
+                <div>
+                    <label for="host" class="block mb-1 font-medium">Host Name</label>
+                    <input type="text" id="host" placeholder="Enter host's name/s" class="w-full border p-3 rounded" />
+                </div>
+                <div>
+                    <label for="date" class="block mb-1 font-medium">Party Date</label>
+                    <input type="date" id="date" placeholder="Select date" class="w-full border p-3 rounded" />
+                </div>
             </div>
 
             <!-- Row 2: Birthday Child + Parent Name -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" id="birthday-child" placeholder="Birthday Child" class="w-full border p-3 rounded" />
-                <input type="text" id="parent-name" placeholder="Parent Name" class="w-full border p-3 rounded" />
+                <div>
+                    <label for="birthday-child" class="block mb-1 font-medium">Birthday Child</label>
+                    <input type="text" id="birthday-child" placeholder="Enter birthday child's name"
+                        class="w-full border p-3 rounded" />
+                </div>
+                <div>
+                    <label for="parent-name" class="block mb-1 font-medium">Parent Name</label>
+                    <input type="text" id="parent-name" placeholder="Enter parent's name"
+                        class="w-full border p-3 rounded" />
+                </div>
             </div>
         </div>
 
         <hr class="my-6 border-t">
         <div class="mt-4">
-            <label class="block mb-2 font-medium">Select a Package:</label>
+            <label class="block mb-2 font-medium">Select a Package</label>
             <select id="package" class="w-full border p-3 rounded">
                 <option value="" disabled selected hidden>-- Select Activity --</option>
 
@@ -52,29 +68,29 @@
 
         <div id="extra-fields" class="mt-6 space-y-4 opacity-50 pointer-events-none transition-opacity duration-300">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              
-              <div>
-                <label for="food" class="block mb-1 font-medium">Food Selection:</label>
-                <select id="food" class="w-full border p-3 rounded" disabled>
-                  <option value="" disabled selected hidden>-- Choose Food --</option>
-                  <option value="Pizza">Pizza</option>
-                  <option value="Hot Dogs">Hot Dogs</option>
-                  <option value="Nuggets">Nuggets</option>
-                </select>
-              </div>
-              
-              <div>
-                <label for="prize" class="block mb-1 font-medium">Prize Selection:</label>
-                <select id="prize" class="w-full border p-3 rounded" disabled>
-                  <option value="" disabled selected hidden>-- Choose Prize --</option>
-                  <option value="Stickers">Stickers</option>
-                  <option value="Toys">Toys</option>
-                  <option value="Candy Bag">Candy Bag</option>
-                </select>
-              </div>
-              
+
+                <div>
+                    <label for="food" class="block mb-1 font-medium">Food Selection</label>
+                    <select id="food" class="w-full border p-3 rounded" disabled>
+                        <option value="" disabled selected hidden>-- Choose Food --</option>
+                        <option value="Pizza">Pizza</option>
+                        <option value="Hot Dogs">Hot Dogs</option>
+                        <option value="Nuggets">Nuggets</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="prize" class="block mb-1 font-medium">Prize Selection</label>
+                    <select id="prize" class="w-full border p-3 rounded" disabled>
+                        <option value="" disabled selected hidden>-- Choose Prize --</option>
+                        <option value="Stickers">Stickers</option>
+                        <option value="Toys">Toys</option>
+                        <option value="Candy Bag">Candy Bag</option>
+                    </select>
+                </div>
+
             </div>
-          </div>          
+        </div>
 
         <hr class="my-6 border-t">
         <div class="mt-8">
@@ -144,57 +160,219 @@
                 </table>
             </div>
         </div>
+        <button onclick="generateEventDocx(getFormData())" class="bg-indigo-600 text-white px-4 py-2 rounded">
+            Download Word Doc
+        </button>
     </div>
     </div>
     </div>
 
 
     </div>
+
+    <script>
+        document.getElementById("package").addEventListener("change", function () {
+            const selected = this.value;
+
+            const row1 = document.getElementById("extra-row-1");
+            const row2 = document.getElementById("extra-row-2");
+
+            const food = document.getElementById("food");
+            const prize = document.getElementById("prize");
+            const extraFields = document.getElementById("extra-fields");
+
+            if (selected) {
+                // Enable food and prize dropdowns
+                food.disabled = false;
+                prize.disabled = false;
+                extraFields.classList.remove("opacity-50", "pointer-events-none");
+            } else {
+                food.disabled = true;
+                prize.disabled = true;
+                extraFields.classList.add("opacity-50", "pointer-events-none");
+            }
+
+            const oneActivity = ["kids-bronze", "kids-silver", "teens-silver"];
+            const twoActivities = ["kids-gold", "kids-platinum", "teens-gold"];
+
+            if (oneActivity.includes(selected)) {
+                row1.style.display = "";
+                row2.style.display = "none";
+            } else if (twoActivities.includes(selected)) {
+                row1.style.display = "";
+                row2.style.display = "";
+            } else {
+                row1.style.display = "none";
+                row2.style.display = "none";
+            }
+        });
+
+        // Re-check on page load
+        window.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("package").dispatchEvent(new Event("change"));
+        });
+    </script>
+
+    <script>
+        function getFormData() {
+            return {
+                host: document.getElementById("host").value,
+                date: document.getElementById("date").value,
+                birthdayChild: document.getElementById("birthday-child").value,
+                parentName: document.getElementById("parent-name").value,
+                package: document.getElementById("package").value,
+                food: document.getElementById("food").value,
+                prize: document.getElementById("prize").value,
+                activity1: document.getElementById("extra-activity-1").value,
+                time1: document.getElementById("extra-time-1").value,
+                activity2: document.getElementById("extra-activity-2").value,
+                time2: document.getElementById("extra-time-2").value
+            };
+        }
+    </script>
+
+    <script>
+        async function generateEventDocx(formData) {
+            const {
+                host,
+                date,
+                birthdayChild,
+                parentName,
+                package,
+                food,
+                prize,
+                activity1,
+                time1,
+                activity2,
+                time2
+            } = formData;
+
+            const doc = new window.docx.Document({
+                styles: {
+                    default: {
+                        document: {
+                            run: {
+                                font: "Arial",
+                                size: 20 // 14pt
+                            }
+                        }
+                    }
+                },
+                sections: [
+                    {
+                        children: [
+                            new docx.Paragraph({
+                                text: "Event Planning Summary",
+                                heading: docx.HeadingLevel.HEADING_1,
+                                spacing: { after: 300 }
+                            }),
+
+                            new docx.Table({
+                                rows: [
+                                    new docx.TableRow({
+                                        children: [
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Host: ${host}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Date: ${date}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Birthday Child: ${birthdayChild}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Parent Name: ${parentName}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            })
+                                        ]
+                                    })
+                                    ,new docx.TableRow({
+                                        children: [
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Host: ${host}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Date: ${date}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Birthday Child: ${birthdayChild}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            }),
+                                            new docx.TableCell({
+                                                children: [new docx.Paragraph(`Parent Name: ${parentName}`)],
+                                                margins: { top: 100, bottom: 100, left: 100, right: 100 },
+                                                width: { size: 25, type: "pct" }
+                                            })
+                                        ]
+                                    })
+                                ],
+                                width: { size: 100, type: "pct" },
+                                borders: { top: { size: 0, color: "FFFFFF" }, bottom: { size: 0, color: "FFFFFF" }, left: { size: 0, color: "FFFFFF" }, right: { size: 0, color: "FFFFFF" } }
+                            }),
+
+                            new docx.Paragraph({
+                                text: `Selected Package: ${package}`,
+                                spacing: { after: 200 }
+                            }),
+
+                            new docx.Paragraph({
+                                text: "Food & Prize",
+                                heading: docx.HeadingLevel.HEADING_2
+                            }),
+                            new docx.Paragraph({ text: `Food: ${food}` }),
+                            new docx.Paragraph({ text: `Prize: ${prize}` }),
+
+                            new docx.Paragraph({
+                                text: "Extra Activities",
+                                heading: docx.HeadingLevel.HEADING_2,
+                                spacing: { before: 400 }
+                            }),
+
+                            new docx.Table({
+                                rows: [
+                                    new docx.TableRow({
+                                        children: [
+                                            new docx.TableCell({ children: [new docx.Paragraph("Activity")] }),
+                                            new docx.TableCell({ children: [new docx.Paragraph("Time")] })
+                                        ]
+                                    }),
+                                    new docx.TableRow({
+                                        children: [
+                                            new docx.TableCell({ children: [new docx.Paragraph(activity1 || "")] }),
+                                            new docx.TableCell({ children: [new docx.Paragraph(time1 || "")] })
+                                        ]
+                                    }),
+                                    new docx.TableRow({
+                                        children: [
+                                            new docx.TableCell({ children: [new docx.Paragraph(activity2 || "")] }),
+                                            new docx.TableCell({ children: [new docx.Paragraph(time2 || "")] })
+                                        ]
+                                    })
+                                ]
+                            })
+                        ]
+                    }
+                ]
+            });
+
+            const blob = await window.docx.Packer.toBlob(doc);
+            window.saveAs(blob, `${host || "event"}-summary.docx`);
+        } 
+    </script>
 
 
 </body>
-
-<script>
-    document.getElementById("package").addEventListener("change", function () {
-      const selected = this.value;
-    
-      const row1 = document.getElementById("extra-row-1");
-      const row2 = document.getElementById("extra-row-2");
-    
-      const food = document.getElementById("food");
-      const prize = document.getElementById("prize");
-      const extraFields = document.getElementById("extra-fields");
-    
-      if (selected) {
-        // Enable food and prize dropdowns
-        food.disabled = false;
-        prize.disabled = false;
-        extraFields.classList.remove("opacity-50", "pointer-events-none");
-      } else {
-        food.disabled = true;
-        prize.disabled = true;
-        extraFields.classList.add("opacity-50", "pointer-events-none");
-      }
-    
-      const oneActivity = ["kids-bronze", "kids-silver", "teens-silver"];
-      const twoActivities = ["kids-gold", "kids-platinum", "teens-gold"];
-    
-      if (oneActivity.includes(selected)) {
-        row1.style.display = "";
-        row2.style.display = "none";
-      } else if (twoActivities.includes(selected)) {
-        row1.style.display = "";
-        row2.style.display = "";
-      } else {
-        row1.style.display = "none";
-        row2.style.display = "none";
-      }
-    });
-    
-    // Re-check on page load
-    window.addEventListener("DOMContentLoaded", () => {
-      document.getElementById("package").dispatchEvent(new Event("change"));
-    });
-    </script>    
 
 </html>
