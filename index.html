@@ -518,7 +518,10 @@
 
                 // Save the PDF
                 const pdfBlob = new Blob([response.data], { type: "application/pdf" });
-                window.saveAs(pdfBlob, `${formData.host || "event"}-summary.pdf`);
+                const namePart = (formData.birthdayChild || formData.host || "event").replace(/\s+/g, "_");
+                const datePart = formData.date || "no-date";
+                const filename = `${datePart}-${namePart}-runsheet.pdf`;
+                window.saveAs(pdfBlob, filename)
             } catch (error) {
                 console.error("Cloudmersive API error:", error);
                 alert("There was a problem converting the DOCX to PDF.");
@@ -528,7 +531,10 @@
         async function generateEventDocx(formData) {
             const doc = await buildWordDocument(formData);
             const blob = await window.docx.Packer.toBlob(doc);
-            window.saveAs(blob, `${formData.host || "event"}-summary.docx`);
+            const namePart = (formData.birthdayChild || formData.host || "event").replace(/\s+/g, "_");
+            const datePart = formData.date || "no-date";
+            const filename = `${datePart}-${namePart}-runsheet.docx`;
+            window.saveAs(blob, filename)
         }
 
         async function buildWordDocument(formData) {
@@ -538,6 +544,7 @@
                 birthdayChild,
                 age,
                 parentName,
+                guests,
                 package,
                 food,
                 gift,
