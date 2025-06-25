@@ -35,6 +35,23 @@
         window.db = db;
         window.firestore = { collection, addDoc };
     </script>
+    <style>
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out;
+        }
+    </style>
 </head>
 
 <body class="p-8 font-sans text-gray-800 text-sm" style="background-image: url('blob-scene-haikei.svg');
@@ -380,32 +397,45 @@
             </div>
         </div>
 
-        <div class="flex gap-4 mt-6">
+        <div class="flex flex-wrap gap-4 mt-8 justify-center">
+
+            <!-- Generate Word Doc -->
             <button type="button" onclick="generateEventDocx(getFormData())"
-                class="bg-[#2B579A] hover:bg-[#1E3E70] text-white px-4 py-2 rounded shadow flex items-center gap-2">
-                <i class="fas fa-file-word text-white text-lg"></i>
-                Generate Word Doc
+                class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full shadow transition">
+                <i class="fas fa-file-word text-lg"></i>
+                Word Doc
             </button>
 
+            <!-- Generate PDF -->
             <button type="button" onclick="generateEventPDF(getFormData())"
-                class="bg-[#D32F2F] hover:bg-[#B71C1C] text-white px-4 py-2 rounded shadow flex items-center gap-2">
-                <i class="fas fa-file-pdf text-white text-lg"></i>
-                Generate PDF
+                class="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-full shadow transition">
+                <i class="fas fa-file-pdf text-lg"></i>
+                PDF
             </button>
 
+            <!-- Save or Update -->
             <button id="save-btn" onclick="handleSave()"
-                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow">
+                class="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-full shadow transition">
+                <i class="fas fa-save text-lg"></i>
                 Save Form
             </button>
 
-            <button onclick="openMyForms()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow">
+            <!-- View Saved Forms -->
+            <button onclick="openMyForms()"
+                class="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-full shadow transition">
+                <i class="fas fa-folder-open text-lg"></i>
                 My Forms
             </button>
 
-            <button onclick="handleNewForm()" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow">
+            <!-- New Form -->
+            <button onclick="handleNewForm()"
+                class="flex items-center gap-2 bg-gray-600 hover:bg-gray-700 text-white px-5 py-2.5 rounded-full shadow transition">
+                <i class="fas fa-plus-circle text-lg"></i>
                 New Form
             </button>
+
         </div>
+
     </div>
     </div>
     </div>
@@ -577,12 +607,12 @@
 
             try {
                 const docRef = await addDoc(collection(db, "runsheets"), formData);
-                alert("Form saved with ID: " + docRef.id);
+                showToast("Form saved successfully!", "success");
                 currentFormId = docRef.id;
                 document.getElementById("save-btn").textContent = "Update Form";
             } catch (e) {
                 console.error("Error adding document: ", e);
-                alert("Failed to save form.");
+                showToast("Failed to save form.", "error");
             }
         }
 
@@ -595,10 +625,10 @@
 
             try {
                 await updateDoc(doc(db, "runsheets", id), formData);
-                alert("Form updated.");
+                showToast("Form updated.", "success");
             } catch (e) {
                 console.error("Error updating form:", e);
-                alert("Failed to update form.");
+                showToast("Failed to update form.", "error");
             }
         }
 
@@ -649,7 +679,7 @@
                 window.saveAs(pdfBlob, filename)
             } catch (error) {
                 console.error("Cloudmersive API error:", error);
-                alert("There was a problem converting the DOCX to PDF.");
+                showToast("There was a problem converting the DOCX to PDF.", "error");
             }
         }
 
@@ -1113,23 +1143,32 @@
                 listContainer.innerHTML = "";
 
                 if (forms.length === 0) {
-                    listContainer.innerHTML = "<p>No saved forms found.</p>";
+                    listContainer.innerHTML = "<p class='text-center text-gray-500 py-2'>No saved forms found.</p>";
                     return;
                 }
 
                 forms.forEach(form => {
                     const wrapper = document.createElement("div");
-                    wrapper.className = "flex justify-between items-center border p-3 rounded";
+                    wrapper.className = "flex justify-between items-center py-2 px-1 hover:bg-gray-50";
 
-                    const label = document.createElement("span");
-                    label.textContent = `${form.date || "No date"} – ${form.birthdayChild || form.host || "Unnamed"}`;
+                    const info = document.createElement("div");
+                    info.className = "flex flex-col";
+
+                    const title = form.birthdayChild || form.host || "Unnamed";
+                    const date = form.date || "No date";
+
+                    info.innerHTML = `
+                <span class="text-sm font-medium text-purple-800 truncate">${title}</span>
+                <span class="text-xs text-gray-500">${date}</span>
+            `;
 
                     const buttons = document.createElement("div");
-                    buttons.className = "flex gap-2";
+                    buttons.className = "flex gap-1 shrink-0";
 
                     const loadBtn = document.createElement("button");
-                    loadBtn.textContent = "Load";
-                    loadBtn.className = "bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm";
+                    loadBtn.className = "px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded shadow";
+                    loadBtn.innerHTML = '<i class="fas fa-upload"></i>';
+                    loadBtn.title = "Load";
                     loadBtn.onclick = () => {
                         populateForm(form);
                         currentFormId = form.id;
@@ -1137,24 +1176,24 @@
                     };
 
                     const deleteBtn = document.createElement("button");
-                    deleteBtn.textContent = "Delete";
-                    deleteBtn.className = "bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm";
+                    deleteBtn.className = "px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded shadow";
+                    deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                    deleteBtn.title = "Delete";
                     deleteBtn.onclick = () => deleteForm(form.id);
 
                     buttons.appendChild(loadBtn);
                     buttons.appendChild(deleteBtn);
 
-                    wrapper.appendChild(label);
+                    wrapper.appendChild(info);
                     wrapper.appendChild(buttons);
 
                     listContainer.appendChild(wrapper);
                 });
 
-
                 document.getElementById("forms-modal").classList.remove("hidden");
             } catch (e) {
                 console.error("Failed to load forms:", e);
-                alert("Could not load saved forms.");
+                showToast("Could not load saved forms.", "error");
             }
         }
 
@@ -1169,7 +1208,7 @@
             if (confirm("Are you sure you want to delete this form?")) {
                 try {
                     await deleteDoc(doc(db, "runsheets", id));
-                    alert("Form deleted.");
+                    showToast("Form deleted.", "success");
 
                     // 👇 Reset if this was the current form
                     if (currentFormId === id) {
@@ -1179,7 +1218,7 @@
                     openMyForms(); // Refresh the list
                 } catch (e) {
                     console.error("Delete failed:", e);
-                    alert("Failed to delete form.");
+                    showToast("Failed to delete form.", "error");
                 }
             }
         }
@@ -1223,16 +1262,66 @@
 
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toast-container");
+
+            const colorMap = {
+                success: "bg-green-600",
+                error: "bg-red-600",
+                warning: "bg-yellow-600",
+                info: "bg-blue-600"
+            };
+
+            const iconMap = {
+                success: "fa-check-circle",
+                error: "fa-times-circle",
+                warning: "fa-exclamation-triangle",
+                info: "fa-info-circle"
+            };
+
+            const toast = document.createElement("div");
+            toast.className = `
+        flex items-center justify-between gap-4 px-4 py-2 rounded-lg shadow-md text-white text-sm animate-slide-in
+        ${colorMap[type] || "bg-gray-800"}
+    `;
+            toast.innerHTML = `
+        <div class="flex items-center gap-2">
+            <i class="fas ${iconMap[type] || "fa-info-circle"} text-white"></i>
+            <span>${message}</span>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 text-xs">&times;</button>
+    `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add("opacity-0");
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
     </script>
 
-    <!-- Modal for listing saved forms -->
-    <div id="forms-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-lg max-h-[80vh] overflow-y-auto w-full max-w-xl">
-            <h2 class="text-xl font-bold mb-4">Saved Forms</h2>
-            <div id="form-list" class="space-y-3"></div>
-            <button onclick="closeMyForms()" class="mt-4 bg-gray-700 text-white px-4 py-2 rounded">Close</button>
+    <div id="forms-modal"
+        class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-auto p-6 relative text-gray-800">
+            <h2 class="text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2 text-purple-700">
+                <i class="fas fa-folder-open"></i> My Saved Run Sheets
+            </h2>
+
+            <div id="form-list" class="divide-y divide-gray-200 max-h-[60vh] overflow-y-auto px-1 text-sm">
+                <!-- Forms will be inserted here -->
+            </div>
+
+            <button onclick="closeMyForms()"
+                class="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition">
+                <i class="fas fa-times text-xl"></i>
+            </button>
         </div>
     </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-6 right-6 space-y-2 z-50"></div>
 
 </body>
 
