@@ -12,7 +12,6 @@
     <script src="https://unpkg.com/docx@8.4.0/build/index.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
@@ -62,7 +61,7 @@
 
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg mb-8 space-y-8">
         <div class="text-center mb-10">
-            <h1 class="text-4xl font-bold mb-6 text-center" style="font-family: 'Dancing Script', cursive;">
+            <h1 class="text-4xl font-bold mb-6 text-center">
                 Michelle Nair's Party Run Sheet</h1>
             <div class="mt-2 h-1 w-24 bg-purple-400 mx-auto rounded-full"></div>
         </div>
@@ -607,12 +606,12 @@
 
             try {
                 const docRef = await addDoc(collection(db, "runsheets"), formData);
-                showToast("Form saved successfully!", "success");
+                showToast("Form saved successfully", "success");
                 currentFormId = docRef.id;
                 document.getElementById("save-btn").textContent = "Update Form";
             } catch (e) {
                 console.error("Error adding document: ", e);
-                showToast("Failed to save form.", "error");
+                showToast("Failed to save form", "error");
             }
         }
 
@@ -625,10 +624,10 @@
 
             try {
                 await updateDoc(doc(db, "runsheets", id), formData);
-                showToast("Form updated.", "success");
+                showToast("Form updated", "success");
             } catch (e) {
                 console.error("Error updating form:", e);
-                showToast("Failed to update form.", "error");
+                showToast("Failed to update form", "error");
             }
         }
 
@@ -679,7 +678,7 @@
                 window.saveAs(pdfBlob, filename)
             } catch (error) {
                 console.error("Cloudmersive API error:", error);
-                showToast("There was a problem converting the DOCX to PDF.", "error");
+                showToast("There was a problem converting the DOCX to PDF", "error");
             }
         }
 
@@ -1130,7 +1129,7 @@
 
         async function openMyForms() {
             const db = window.db;
-            const { collection, getDocs } = await import('https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js');
+            const { collection, getDocs, doc, deleteDoc } = await import('https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js');
 
             try {
                 const snapshot = await getDocs(collection(db, "runsheets"));
@@ -1142,8 +1141,15 @@
                 const listContainer = document.getElementById("form-list");
                 listContainer.innerHTML = "";
 
+                // ✅ Always open the modal
+                document.getElementById("forms-modal").classList.remove("hidden");
+
                 if (forms.length === 0) {
-                    listContainer.innerHTML = "<p class='text-center text-gray-500 py-2'>No saved forms found.</p>";
+                    listContainer.innerHTML = `
+                <div class="text-center text-gray-500 py-6">
+                    <i class="fas fa-folder-open text-3xl mb-2 text-purple-300"></i>
+                    <p class="text-sm">No saved forms found yet.</p>
+                </div>`;
                     return;
                 }
 
@@ -1179,21 +1185,36 @@
                     deleteBtn.className = "px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded shadow";
                     deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
                     deleteBtn.title = "Delete";
-                    deleteBtn.onclick = () => deleteForm(form.id);
+                    deleteBtn.onclick = async () => {
+                        const confirmed = confirm("Are you sure you want to delete this form?");
+                        if (!confirmed) return;
+
+                        try {
+                            await deleteDoc(doc(db, "runsheets", form.id));
+                            showToast("Form deleted", "success");
+
+                            if (currentFormId === form.id) {
+                                handleNewForm(); // Clear current form
+                            }
+
+                            openMyForms(); // Refresh list
+                        } catch (err) {
+                            console.error("Error deleting form:", err);
+                            showToast("Failed to delete form", "error");
+                        }
+                    };
 
                     buttons.appendChild(loadBtn);
                     buttons.appendChild(deleteBtn);
 
                     wrapper.appendChild(info);
                     wrapper.appendChild(buttons);
-
                     listContainer.appendChild(wrapper);
                 });
 
-                document.getElementById("forms-modal").classList.remove("hidden");
             } catch (e) {
                 console.error("Failed to load forms:", e);
-                showToast("Could not load saved forms.", "error");
+                showToast("Could not load saved forms", "error");
             }
         }
 
@@ -1208,7 +1229,7 @@
             if (confirm("Are you sure you want to delete this form?")) {
                 try {
                     await deleteDoc(doc(db, "runsheets", id));
-                    showToast("Form deleted.", "success");
+                    showToast("Form deleted", "success");
 
                     // 👇 Reset if this was the current form
                     if (currentFormId === id) {
@@ -1218,7 +1239,7 @@
                     openMyForms(); // Refresh the list
                 } catch (e) {
                     console.error("Delete failed:", e);
-                    showToast("Failed to delete form.", "error");
+                    showToast("Failed to delete form", "error");
                 }
             }
         }
@@ -1266,39 +1287,22 @@
         function showToast(message, type = "info") {
             const container = document.getElementById("toast-container");
 
-            const colorMap = {
-                success: "bg-green-600",
-                error: "bg-red-600",
-                warning: "bg-yellow-600",
-                info: "bg-blue-600"
-            };
-
-            const iconMap = {
-                success: "fa-check-circle",
-                error: "fa-times-circle",
-                warning: "fa-exclamation-triangle",
-                info: "fa-info-circle"
-            };
-
             const toast = document.createElement("div");
             toast.className = `
-        flex items-center justify-between gap-4 px-4 py-2 rounded-lg shadow-md text-white text-sm animate-slide-in
-        ${colorMap[type] || "bg-gray-800"}
+        flex items-center gap-3 px-4 py-2 rounded-lg shadow-lg text-white text-sm animate-slide-in
+        ${type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-gray-800"}
     `;
             toast.innerHTML = `
-        <div class="flex items-center gap-2">
-            <i class="fas ${iconMap[type] || "fa-info-circle"} text-white"></i>
-            <span>${message}</span>
-        </div>
-        <button onclick="this.parentElement.remove()" class="text-white hover:text-gray-200 text-xs">&times;</button>
+        <i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle"} text-white"></i>
+        <span>${message}</span>
     `;
 
             container.appendChild(toast);
 
             setTimeout(() => {
                 toast.classList.add("opacity-0");
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+                setTimeout(() => container.removeChild(toast), 300);
+            }, 3000);
         }
     </script>
 
@@ -1306,7 +1310,7 @@
         class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black bg-opacity-60 transition-opacity duration-300">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-auto p-6 relative text-gray-800">
             <h2 class="text-2xl font-bold text-center mb-4 flex items-center justify-center gap-2 text-purple-700">
-                <i class="fas fa-folder-open"></i> My Saved Run Sheets
+                <i class="fas fa-folder-open"></i> Saved Run Sheets
             </h2>
 
             <div id="form-list" class="divide-y divide-gray-200 max-h-[60vh] overflow-y-auto px-1 text-sm">
