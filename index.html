@@ -12,10 +12,10 @@
     <script src="https://unpkg.com/docx@8.4.0/build/index.umd.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
 
-<body class="p-8 font-sans text-gray-800 text-sm"
-  style="background-image: url('blob-scene-haikei.png');
+<body class="p-8 font-sans text-gray-800 text-sm" style="background-image: url('blob-scene-haikei.svg');
          background-size: cover;
          background-repeat: no-repeat;
          background-position: top;
@@ -23,39 +23,47 @@
 
     <!-- User Form -->
     <div class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg mb-8 space-y-8">
-        <h1 class="text-2xl font-bold mb-6 text-center">Michelle's Event Planning Form</h1>
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-6 text-center" style="font-family: 'Dancing Script', cursive;">
+                Michelle Nair's Party Run Sheet</h1>
+            <div class="mt-2 h-1 w-24 bg-purple-400 mx-auto rounded-full"></div>
+        </div>
 
         <div class="space-y-4">
-            <!-- Row 1: Host Name + Date -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Row 1: Host / Date -->
                 <div>
-                    <label for="host" class="block mb-1 font-medium">Host Name</label>
-                    <input type="text" id="host" placeholder="Enter host's name/s" class="w-full border p-3 rounded" />
+                    <label for="host" class="block mb-1 font-medium">Host Name(s)</label>
+                    <input type="text" id="host" placeholder="e.g. Michelle, Jordan"
+                        class="w-full border p-3 rounded" />
                 </div>
                 <div>
                     <label for="date" class="block mb-1 font-medium">Party Date</label>
-                    <input type="date" id="date" placeholder="Select date" class="w-full border p-3 rounded" />
+                    <input type="date" id="date" class="w-full border p-3 rounded" />
                 </div>
-            </div>
 
-            <!-- Row 2: Birthday Child + Parent Name, with Age under Birthday Child -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Row 2: Birthday Child / Age -->
                 <div>
-                    <label for="birthday-child" class="block mb-1 font-medium">Birthday Child</label>
-                    <input type="text" id="birthday-child" placeholder="Enter birthday child's name"
-                        class="w-full border p-3 rounded mb-3" />
-
-                    <label for="age" class="block mb-1 font-medium">Child Age</label>
-                    <input type="number" id="age" min="1" max="18" placeholder="Enter age"
+                    <label for="birthday-child" class="block mb-1 font-medium">Birthday Child(ren)</label>
+                    <input type="text" id="birthday-child" placeholder="e.g. Ava, Leo"
                         class="w-full border p-3 rounded" />
                 </div>
                 <div>
-                    <label for="parent-name" class="block mb-1 font-medium">Parent Name</label>
-                    <input type="text" id="parent-name" placeholder="Enter parent's name"
+                    <label for="age" class="block mb-1 font-medium">Age(s)</label>
+                    <input type="text" id="age" placeholder="e.g. 5, 7" class="w-full border p-3 rounded" />
+                </div>
+
+                <!-- Row 3: Parent / Guests -->
+                <div>
+                    <label for="parent-name" class="block mb-1 font-medium">Parent Name(s)</label>
+                    <input type="text" id="parent-name" placeholder="e.g. Sarah, Alex"
                         class="w-full border p-3 rounded" />
                 </div>
+                <div>
+                    <label for="guests" class="block mb-1 font-medium">Number of Guests</label>
+                    <input type="number" id="guests" min="1" placeholder="e.g. 12" class="w-full border p-3 rounded" />
+                </div>
             </div>
-
         </div>
 
         <hr class="my-6 border-t">
@@ -276,6 +284,7 @@
                 birthdayChild: document.getElementById("birthday-child").value,
                 parentName: document.getElementById("parent-name").value,
                 age: document.getElementById("age").value,
+                guests: document.getElementById("guests").value,
                 package: document.getElementById("package").value,
                 food: document.getElementById("food").value,
                 prize: document.getElementById("prize").value,
@@ -293,7 +302,7 @@
     </script>
 
     <script>
-        async function generateEventDocxAndConvertToPDF(formData) {
+        async function generateEventPDF(formData) {
             const doc = await buildWordDocument(formData); // Extract your doc creation logic to this
             const blob = await window.docx.Packer.toBlob(doc);
 
@@ -355,7 +364,7 @@
                     default: {
                         document: {
                             run: {
-                                font: "Roboto",
+                                font: "Calibri",
                                 size: 20 // 14pt
                             }
                         }
@@ -426,7 +435,7 @@
                                     }),
                                     new docx.TableRow({
                                         children: [
-                                            createCell("No. of Guests:", ""),
+                                            createCell("No. of Guests:", guests),
                                             createCell("Table Number:", ""),
                                             createCell("Waiting Table:", "")
                                         ]
