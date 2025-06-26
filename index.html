@@ -652,6 +652,10 @@
                 // This is an update
                 await updateFormInFirestore(currentFormId, formData);
 
+                const titleEl = document.getElementById("form-title");
+                const sheetTitle = formData.birthdayChild || formData.host || "Unnamed";
+                titleEl.textContent = sheetTitle;
+
                 // Refresh the My Forms list if it's visible
                 if (document.getElementById("my-forms-modal")?.style.display === "block") {
                     openMyForms(); // Re-fetch and re-render list
