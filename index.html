@@ -60,15 +60,21 @@
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    background-color: #fdf4ff;
     background-attachment: fixed;">
+
+    <!-- Logo for small screens (shown only on mobile) -->
+    <div class="w-full flex justify-center mb-4 md:hidden">
+        <img src="logo-white.png" alt="Michelle Nair's Party Run Sheets Logo" class="h-40 transition duration-300 transform hover:scale-105 hover:drop-shadow-lg object-contain" draggable="false"/>
+    </div>
 
     <div class="max-w-7xl mx-auto flex flex-col md:flex-row-reverse gap-8 items-start">
         <div class="w-full md:w-[800px] mx-auto bg-white p-8 rounded-lg shadow-lg space-y-8">
-            <div class="text-center mb-10">
-                <h1 class="text-4xl font-bold mb-6 text-center">
-                    Michelle Nair's Party Run Sheet</h1>
-                <div class="mt-2 h-1 w-24 bg-purple-400 mx-auto rounded-full"></div>
+            <div class="text-center mb-10 space-y-2">
+                <h1 id="form-title" class="text-4xl font-extrabold text-purple-800 tracking-tight">
+                    New Form
+                </h1>
+                <p id="form-subtitle" class="text-sm text-gray-500">Michelle Nair’s Party Run Sheet</p>
+                <div class="h-1 w-16 bg-purple-400 mx-auto rounded-full"></div>
             </div>
 
             <div class="space-y-4">
@@ -403,6 +409,10 @@
             </div>
         </div>
         <div class="w-full md:w-64 md:sticky md:top-8 self-start">
+            <div class="w-full flex items-center justify-center md:w-64 md:sticky md:top-8 self-start">
+                <img src="logo-white.png" alt="Michelle Nair's Party Run Sheets Logo"
+                    class="h-30 object-contain transition duration-300 transform hover:scale-105 hover:drop-shadow-lg hidden md:block" draggable="false"/>
+            </div>
             <div class="bg-white p-4 rounded-lg shadow-lg space-y-4">
                 <!-- Buttons go here -->
                 <button type="button" onclick="generateEventDocx(getFormData())"
@@ -580,10 +590,12 @@
             // Change button text to "Update"
             const btn = document.getElementById("save-btn");
             if (btn) {
-                btn.innerHTML = `
-    <i class="fas fa-pen-to-square text-lg"></i> Update Form
-  `;
+                btn.innerHTML = `<i class="fas fa-pen-to-square text-lg"></i> Update Form`;
             }
+
+            const titleEl = document.getElementById("form-title");
+            const sheetTitle = data.birthdayChild || data.host || "Unnamed";
+            titleEl.textContent = sheetTitle;
             window.scrollTo({ top: 0, behavior: "smooth" });
         }
 
@@ -646,6 +658,9 @@
             } else {
                 // This is a new save
                 await saveFormToFirestore(formData);
+                const titleEl = document.getElementById("form-title");
+                const sheetTitle = formData.birthdayChild || formData.host || "Unnamed";
+                titleEl.textContent = sheetTitle;
             }
         }
 
@@ -1274,11 +1289,11 @@
             document.getElementById("winners-time").value = "";
             document.getElementById("cake-time").value = "";
 
+            document.getElementById("form-title").textContent = "New Form";
+
             // Reset state
             currentFormId = null;
-            document.getElementById("save-btn").innerHTML = `
-  <i class="fas fa-save text-lg"></i> Save Form
-`;
+            document.getElementById("save-btn").innerHTML = `<i class="fas fa-save text-lg"></i> Save Form`;
 
             // Reset package logic
             document.getElementById("partypkg").dispatchEvent(new Event("change"));
@@ -1290,14 +1305,8 @@
             const container = document.getElementById("toast-container");
 
             const toast = document.createElement("div");
-            toast.className = `
-        flex items-center gap-3 px-4 py-2 rounded-lg shadow-lg text-white text-sm animate-slide-in
-        ${type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-gray-800"}
-    `;
-            toast.innerHTML = `
-        <i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle"} text-white"></i>
-        <span>${message}</span>
-    `;
+            toast.className = `flex items-center gap-3 px-4 py-2 rounded-lg shadow-lg text-white text-sm animate-slide-in ${type === "success" ? "bg-green-600" : type === "error" ? "bg-red-600" : "bg-gray-800"}`;
+            toast.innerHTML = `<i class="fas ${type === "success" ? "fa-check-circle" : type === "error" ? "fa-exclamation-circle" : "fa-info-circle"} text-white"></i><span>${message}</span>`;
 
             container.appendChild(toast);
 
